@@ -544,6 +544,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 			// Prepare the bean factory for use in this context.
 			// beanFactory的准备工作，对各种属性进行填充
+			// 配置工厂的标准上下文特征，包括上下文的类加载器和 post-processors 后置增强器
 			prepareBeanFactory(beanFactory);
 
 			try {
@@ -670,6 +671,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	}
 
 	/**
+	 * 配置工厂的标准上下文特征，包括上下文的类加载器和 post-processors 后置增强器
 	 * Configure the factory's standard context characteristics,
 	 * such as the context's ClassLoader and post-processors.
 	 * @param beanFactory the BeanFactory to configure
@@ -678,9 +680,11 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		// Tell the internal bean factory to use the context's class loader etc.
 		// 设置beanFactory的classloader为当前context的classloader
 		beanFactory.setBeanClassLoader(getClassLoader());
-		// 设置beanfactory的表达式语言处理器
+		// 设置beanFactory的表达式语言处理器，用于处理解析 SpringEL 表达式
+		// StandardBeanExpressionResolver 处理器中包含了一个 SpelExpressionParser 解析器
 		beanFactory.setBeanExpressionResolver(new StandardBeanExpressionResolver(beanFactory.getBeanClassLoader()));
-		// 为beanFactory增加一个默认的propertyEditor，这个主要是对bean的属性等设置管理的一个工具类
+		// 为beanFactory增加一个默认的 propertyEditor，这个主要是对bean的属性等设置管理的一个工具类
+		// 添加的 ResourceEditorRegistrar 之后在哪使用的？
 		beanFactory.addPropertyEditorRegistrar(new ResourceEditorRegistrar(this, getEnvironment()));
 
 		// Configure the bean factory with context callbacks.
@@ -688,6 +692,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		beanFactory.addBeanPostProcessor(new ApplicationContextAwareProcessor(this));
 		// 设置要忽略自动装配的接口，为什么此处要对这些接口进行忽略，原因非常简单，这些接口的实现是由容器通过set方法进行注入的，
 		// 所以在使用autowire进行注入的时候需要将这些接口进行忽略
+		// 以下忽略的接口都在 ApplicationContextAwareProcessor 进行处理了。所以在此直接忽略掉
 		beanFactory.ignoreDependencyInterface(EnvironmentAware.class);
 		beanFactory.ignoreDependencyInterface(EmbeddedValueResolverAware.class);
 		beanFactory.ignoreDependencyInterface(ResourceLoaderAware.class);
@@ -697,15 +702,26 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 
 		// BeanFactory interface not registered as resolvable type in a plain factory.
 		// MessageSource registered (and found for autowiring) as a bean.
+		// 设置几个自动装配的特殊规则,当在进行ioc初始化的如果有多个实现，那么就使用指定的对象进行注入。
+		// 问题： @Autowire 注解是怎么实现的？
 		beanFactory.registerResolvableDependency(BeanFactory.class, beanFactory);
 		beanFactory.registerResolvableDependency(ResourceLoader.class, this);
 		beanFactory.registerResolvableDependency(ApplicationEventPublisher.class, this);
 		beanFactory.registerResolvableDependency(ApplicationContext.class, this);
 
 		// Register early post-processor for detecting inner beans as ApplicationListeners.
+		// 将用于检测内部 bean 的 BeanPostProcessor 早期后处理器注册为 ApplicationListeners
 		beanFactory.addBeanPostProcessor(new ApplicationListenerDetector(this));
 
 		// Detect a LoadTimeWeaver and prepare for weaving, if found.
+		// 增加对AspectJ的支持，在java中织入分为三种方式:编译器织入，类加载器织入，运行期织入，
+		// 1、编译器织入是指在java编译期间，采用特殊的编译器，将切面织入到java类中，
+		// 2、类加载器织入则指通过特殊的类加载器，在类字节码加载到JVM时，织入切面，
+		// 3、运行期织入则是采用cglib和jdk进行切面的织入
+		// aspectj提供了两种织入方式：
+		// 第一种是通过特殊编译器，在编译器，将aspectj语言编写的切面类织入到java类中
+		// 第二种是类加载期织入，就是下面的load time weaving，此处待后续说明
+		// TODO: 2021/9/4 后续说明 aspectj 的类加载器织入
 		if (beanFactory.containsBean(LOAD_TIME_WEAVER_BEAN_NAME)) {
 			beanFactory.addBeanPostProcessor(new LoadTimeWeaverAwareProcessor(beanFactory));
 			// Set a temporary ClassLoader for type matching.
@@ -713,6 +729,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 		}
 
 		// Register default environment beans.
+		// 注册默认的系统环境bean到一级缓存中
 		if (!beanFactory.containsLocalBean(ENVIRONMENT_BEAN_NAME)) {
 			beanFactory.registerSingleton(ENVIRONMENT_BEAN_NAME, getEnvironment());
 		}
@@ -886,6 +903,7 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void finishBeanFactoryInitialization(ConfigurableListableBeanFactory beanFactory) {
 		// Initialize conversion service for this context.
+		// 为当前的上下文 初始化转换服务
 		if (beanFactory.containsBean(CONVERSION_SERVICE_BEAN_NAME) &&
 				beanFactory.isTypeMatch(CONVERSION_SERVICE_BEAN_NAME, ConversionService.class)) {
 			beanFactory.setConversionService(

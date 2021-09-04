@@ -37,6 +37,7 @@ import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
+ * BeanExpressionResolver 接口的标准实现。用于解析和计算 Spring's expression 模块的 Spring EL 表达式
  * Standard implementation of the
  * {@link org.springframework.beans.factory.config.BeanExpressionResolver}
  * interface, parsing and evaluating Spring EL using Spring's expression module.

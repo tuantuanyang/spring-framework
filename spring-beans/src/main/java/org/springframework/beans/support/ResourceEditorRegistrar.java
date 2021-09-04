@@ -66,6 +66,8 @@ public class ResourceEditorRegistrar implements PropertyEditorRegistrar {
 
 
 	/**
+	 * 根据给定的 ResourceLoader 和 PropertyResolver 常见一个 ResourceEditorRegistrar 。
+	 * 注意这里的拓展点是 ResourceEditorRegistrar 实现的接口 {@link PropertyEditorRegistrar} 。点进去看看
 	 * Create a new ResourceEditorRegistrar for the given {@link ResourceLoader}
 	 * and {@link PropertyResolver}.
 	 * @param resourceLoader the ResourceLoader (or ResourcePatternResolver)
