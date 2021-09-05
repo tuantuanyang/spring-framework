@@ -1383,11 +1383,13 @@ public class BeanDefinitionParserDelegate {
 		if (namespaceUri == null) {
 			return null;
 		}
+		// 根据 namespaceUri 获取对应的 NameSpaceHandler
 		NamespaceHandler handler = this.readerContext.getNamespaceHandlerResolver().resolve(namespaceUri);
 		if (handler == null) {
 			error("Unable to locate Spring NamespaceHandler for XML schema namespace [" + namespaceUri + "]", ele);
 			return null;
 		}
+		// 使用handler解析相应的标签
 		return handler.parse(ele, new ParserContext(this.readerContext, this, containingBd));
 	}
 
