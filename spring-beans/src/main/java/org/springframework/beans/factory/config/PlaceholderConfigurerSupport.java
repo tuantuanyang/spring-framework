@@ -236,6 +236,7 @@ public abstract class PlaceholderConfigurerSupport extends PropertyResourceConfi
 		beanFactoryToProcess.resolveAliases(valueResolver);
 
 		// New in Spring 3.0: resolve placeholders in embedded values such as annotation attributes.
+		// 设置值处理器的占位符
 		beanFactoryToProcess.addEmbeddedValueResolver(valueResolver);
 	}
 

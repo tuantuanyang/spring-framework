@@ -140,7 +140,8 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 	private boolean allowRawInjectionDespiteWrapping = false;
 
 	/**
-	 * 在依赖项检查和自动装配时要忽略的依赖项类型，作为类对象集，默认为空
+	 * 在依赖项
+	 * 检查和自动装配时要忽略的依赖项类型，作为类对象集，默认为空
 	 * Dependency types to ignore on dependency check and autowire,
 	 * as Set of Class objects: for example, String. Default is none.
 	 */
@@ -488,13 +489,19 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 		// Make sure bean class is actually resolved at this point, and
 		// clone the bean definition in case of a dynamically resolved Class
 		// which cannot be stored in the shared merged bean definition.
+		// 锁定class，根据设置的class属性或者根据className来解析class
 		Class<?> resolvedClass = resolveBeanClass(mbd, beanName);
+		// 进行条件筛选，重新赋值RootBeanDefinition,并设置BeanClass属性
 		if (resolvedClass != null && !mbd.hasBeanClass() && mbd.getBeanClassName() != null) {
+			// 重新创建一个RootBeanDefinition对象
 			mbdToUse = new RootBeanDefinition(mbd);
+			// 设置BeanClass属性值
 			mbdToUse.setBeanClass(resolvedClass);
 		}
 
 		// Prepare method overrides.
+		// 验证及准备覆盖的方法,lookup-method  replace-method
+		// 当需要创建的bean对象中包含了lookup-method和replace-method标签的时候，会产生覆盖操作
 		try {
 			mbdToUse.prepareMethodOverrides();
 		}
@@ -505,6 +512,7 @@ public abstract class AbstractAutowireCapableBeanFactory extends AbstractBeanFac
 
 		try {
 			// Give BeanPostProcessors a chance to return a proxy instead of the target bean instance.
+			// 给BeanPostProcessors一个机会来返回代理来替代真正的实例，应用实例化前的前置处理器
 			Object bean = resolveBeforeInstantiation(beanName, mbdToUse);
 			if (bean != null) {
 				return bean;
