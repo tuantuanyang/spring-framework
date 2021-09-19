@@ -6,6 +6,7 @@ import com.tuan.spring.factorybean.MyFactoryBean;
 import com.tuan.spring.methodoverride.Apple;
 import com.tuan.spring.methodoverride.Banana;
 import com.tuan.spring.methodoverride.FruitPlate;
+import com.tuan.spring.resolveBeanPostProcesssor.BeforeInstantiation;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 
@@ -43,13 +44,21 @@ public class Main {
 		 *
 		 * 通过拦截器的方式每次需要的时候都去创建最新的对象，而不会把原型对象缓存起来
 		 */
-		ApplicationContext context = new ClassPathXmlApplicationContext("methodoverride.xml");
-		FruitPlate fruitPlate1 = context.getBean("fruitPlate1", FruitPlate.class);
-		Apple apple = (Apple) fruitPlate1.getFruit();
-		System.out.println(apple);
-		FruitPlate fruitPalate2 = context.getBean("fruitPlate2", FruitPlate.class);
-		Banana banana = (Banana) fruitPalate2.getFruit();
-		System.out.println(banana);
+//		ApplicationContext context = new ClassPathXmlApplicationContext("methodoverride.xml");
+//		FruitPlate fruitPlate1 = context.getBean("fruitPlate1", FruitPlate.class);
+//		Apple apple = (Apple) fruitPlate1.getFruit();
+//		System.out.println(apple);
+//		FruitPlate fruitPalate2 = context.getBean("fruitPlate2", FruitPlate.class);
+//		Banana banana = (Banana) fruitPalate2.getFruit();
+//		System.out.println(banana);
+
+//		ApplicationContext ac = new ClassPathXmlApplicationContext("resolveBeforeInstantiation.xml");
+//		BeforeInstantiation bean = ac.getBean(BeforeInstantiation.class);
+//		bean.doSomeThing();
+
+		ApplicationContext context = new ClassPathXmlApplicationContext("supplier.xml");
+		User bean = context.getBean(User.class);
+		System.out.println(bean.getName());
 
 	}
 
